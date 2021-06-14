@@ -59,4 +59,5 @@ jobs:
           php artisan route:cache
           php artisan view:cache
           sudo chmod -R 774 /var/app/storage
-          sudo php artisan serve --host ${{ secrets.PRODUCTION_HOSTNAME }} --port 80
+          sudo service nginx restart
+

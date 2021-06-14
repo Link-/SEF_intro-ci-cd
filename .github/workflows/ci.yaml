@@ -118,4 +118,5 @@ jobs:
           php artisan config:cache
           php artisan route:cache
           php artisan view:cache
-          sudo php artisan serve --host ${{ secrets.STAGING_HOSTNAME }} --port 80
+          sudo chmod -R 774 /var/app/storage
+          sudo service nginx restart
