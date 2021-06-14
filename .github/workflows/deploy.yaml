@@ -58,4 +58,5 @@ jobs:
           php artisan config:cache
           php artisan route:cache
           php artisan view:cache
+          sudo chmod -R 774 /var/app/storage
           sudo php artisan serve --host ${{ secrets.PRODUCTION_HOSTNAME }} --port 80
