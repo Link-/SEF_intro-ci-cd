@@ -13,7 +13,7 @@ jobs:
 
   # Deploy the current branch to production
   deploy:
-    name: 'Deploy to staging'
+    name: 'Deploy to production'
     runs-on: ubuntu-latest
     steps:
 
@@ -37,7 +37,7 @@ jobs:
         envkey_APP_URL: http://${{ secrets.PRODUCTION_HOSTNAME }}
     
     - uses: burnett01/rsync-deployments@4.1
-      name: 'Deploy to staging'
+      name: 'Deploy to production'
       with:
         switches: -avzr --delete
         path: ./
