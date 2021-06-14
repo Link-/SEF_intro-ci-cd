@@ -1,0 +1,119 @@
+name: Continuous Integration Workflow
+
+# This workflow is triggered whenever a new PR is created on the main branch
+# or when new commits are pushed against a branch matching 
+# the pattern: feature/**
+# We also have the option to manually trigger the workflow. Useful for testing.
+on:
+  push:
+    branches:
+      - 'feature/**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+
+  # Run unit tests to make sure everything is 👍
+  test:
+    name: 'Run unit tests'
+    # Specify the OS we want the workflow to run on
+    runs-on: ubuntu-latest
+    steps:
+    
+    - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+      name: 'Setup PHP 8.0'
+      with:
+        php-version: '8.0'
+    
+    - uses: actions/checkout@v2
+      name: 'Checkout repository'
+
+    - name: 'Copy .env'
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+    
+    - name: 'Install Dependencies'
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+    
+    - name: 'Generate key'
+      run: php artisan key:generate
+    
+    - name: 'Update Directory Permissions'
+      run: chmod -R 777 storage bootstrap/cache
+    
+    - name: 'Run Tests'
+      run: php artisan test
+
+  # Run the linter to check for code style issues
+  lint:
+    name: 'Run linter'
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+      name: 'Setup PHP 8.0'
+      with:
+        php-version: '8.0'
+    
+    - uses: actions/checkout@v2
+      name: 'Checkout repository'
+
+    - name: 'Copy .env'
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+    
+    - name: 'Install Dependencies'
+      run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+    - name: 'Run Linter'
+      run: vendor/bin/phpcs ./app/Http/Controllers
+  
+  # Deploy the current branch to staging
+  deploy:
+    name: 'Deploy to staging'
+    runs-on: ubuntu-latest
+    # Requires the test and lint jobs to be completed successfully before
+    # deploying
+    needs: ['test', 'lint']
+    steps:
+
+    - uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+      name: 'Setup PHP 8.0'
+      with:
+        php-version: '8.0'
+    
+    - uses: actions/checkout@v2
+      name: 'Checkout repository'
+
+    - name: 'Copy .env'
+      run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+
+    - uses: SpicyPizza/create-envfile@v1
+      with:
+        envkey_APP_NAME: Laravel
+        envkey_APP_ENV: local
+        envkey_APP_DEBUG: true
+        envkey_APP_URL: http://${{ secrets.STAGING_HOSTNAME }}
+    
+    - uses: burnett01/rsync-deployments@4.1
+      name: 'Deploy to staging'
+      with:
+        switches: -avzr --delete
+        path: ./
+        remote_path: /var/app/
+        remote_host: ${{ secrets.STAGING_HOSTNAME }}
+        remote_user: ${{ secrets.STAGING_REMOTE_USER }}
+        remote_key: ${{ secrets.STAGING_SSH_KEY }}
+    
+    - uses: JimCronqvist/action-ssh@master
+      name: Execute SSH commmands on remote server
+      with:
+        hosts: '${{ secrets.STAGING_REMOTE_USER }}@${{ secrets.STAGING_HOSTNAME }}'
+        privateKey: ${{ secrets.STAGING_SSH_KEY }}
+        command: |
+          cd /var/app/
+          composer install --optimize-autoloader --no-dev
+          php artisan key:generate
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          php artisan serve --host ${{ secrets.STAGING_HOSTNAME }} --port 80
