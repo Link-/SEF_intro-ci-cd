@@ -93,6 +93,7 @@ jobs:
         envkey_APP_NAME: Laravel
         envkey_APP_ENV: local
         envkey_APP_DEBUG: true
+        envkey_APP_KEY: ''
         envkey_APP_URL: http://${{ secrets.STAGING_HOSTNAME }}
     
     - uses: burnett01/rsync-deployments@4.1
@@ -117,4 +118,4 @@ jobs:
           php artisan config:cache
           php artisan route:cache
           php artisan view:cache
-          php artisan serve --host ${{ secrets.STAGING_HOSTNAME }} --port 80
+          sudo php artisan serve --host ${{ secrets.STAGING_HOSTNAME }} --port 80
