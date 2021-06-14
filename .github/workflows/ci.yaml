@@ -65,7 +65,8 @@ jobs:
       run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
     - name: 'Run Linter'
-      run: vendor/bin/phpcs ./app/Http/Controllers
+      # Run the linter with the -n option to ignore warnings
+      run: vendor/bin/phpcs -n ./app/Http/Controllers
   
   # Deploy the current branch to staging
   deploy:
