@@ -36,7 +36,7 @@ jobs:
         envkey_APP_KEY: ''
         envkey_APP_URL: http://${{ secrets.PRODUCTION_HOSTNAME }}
     
-    - uses: burnett01/rsync-deployments@4.1
+    - uses: burnett01/rsync-deployments@23a557dceb19f9bb960ef40cf75cab5e9b37ec1f
       name: 'Deploy to production'
       with:
         switches: -avzr --delete
@@ -46,7 +46,7 @@ jobs:
         remote_user: ${{ secrets.PRODUCTION_REMOTE_USER }}
         remote_key: ${{ secrets.PRODUCTION_SSH_KEY }}
     
-    - uses: JimCronqvist/action-ssh@master
+    - uses: JimCronqvist/action-ssh@7737f1192ddd8376686e9d6354dea44592c942bf
       name: Execute SSH commmands on remote server
       with:
         hosts: '${{ secrets.PRODUCTION_REMOTE_USER }}@${{ secrets.PRODUCTION_HOSTNAME }}'
