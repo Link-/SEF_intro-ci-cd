@@ -20,3 +20,12 @@ Route::get('/', function () {
 Route::get('/new_message', function () {
     return 'New message!';
 });
+
+Route::get('/health', function () {
+    return response()
+        ->json([
+            'status' => 'OK',
+            'services_down' => 0
+        ])
+        ->header('Content-Type', 'application/json');
+});
