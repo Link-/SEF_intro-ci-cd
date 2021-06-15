@@ -1,13 +1,8 @@
 name: Continuous Integration Workflow
 
 # This workflow is triggered whenever a new PR is created on the main branch
-# or when new commits are pushed against a branch matching 
-# the pattern: feature/**
 # We also have the option to manually trigger the workflow. Useful for testing.
 on:
-  push:
-    branches:
-      - 'feature/**'
   pull_request:
     branches:
       - main
