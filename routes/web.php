@@ -20,3 +20,11 @@ Route::get('/', function () {
 Route::get('/new_message', function () {
     return 'New message!';
 });
+
+Route::get('all-food-items', function () { 
+    return response()->json([
+        'item1'=>'Banana',
+        'item2'=>'Apple',
+        'item3'=>'Strawberry',
+    ]);
+});
